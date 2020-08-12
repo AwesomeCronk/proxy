@@ -9,22 +9,22 @@ serverSide: __init__ called
 serverSide: socket created
 serverSide: socket bound
 proxy: sSide initiaized
-proxy: Ip address of the proxy is: 192.168.254.72
+proxy: Ip address of the proxy is: 192.***.***.**
 clientSide: run called
 proxy: started cSide
 clientSide: waiting for client connection...
 serverSide: run called
 proxy: started sSide
 serverSide: waiting for client to get connection...  
-clientSide: connection from ('192.168.254.71', 63641)
+clientSide: connection from ('192.***.***.**', 63641)
 clientSide: received data from client:
-b'GET / HTTP/1.1\r\nHost: 192.168.254.72\r\nUpgrade-Insecure-Requests: 1\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\nUser-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 13_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0 EdgiOS/45.6.8 Mobile/15E148 Safari/605.1.15\r\nAccept-Language: en-us\r\nAccept-Encoding: gzip, deflate\r\nConnection: keep-alive\r\n\r\n'
+b'GET / HTTP/1.1\r\nHost: 192.***.***.**\r\nUpgrade-Insecure-Requests: 1\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\nUser-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 13_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0 EdgiOS/45.6.8 Mobile/15E148 Safari/605.1.15\r\nAccept-Language: en-us\r\nAccept-Encoding: gzip, deflate\r\nConnection: keep-alive\r\n\r\n'
 serverSide: connecting socket...
 proxy: Forwarding data to server.
 serverSide: socket connected
 serverSide: sendall called
 serverSide: sending data to server:
-b'GET / HTTP/1.1\r\nHost: 192.168.254.72\r\nUpgrade-Insecure-Requests: 1\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\nUser-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 13_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0 EdgiOS/45.6.8 Mobile/15E148 Safari/605.1.15\r\nAccept-Language: en-us\r\nAccept-Encoding: gzip, deflate\r\nConnection: keep-alive\r\n\r\n'
+b'GET / HTTP/1.1\r\nHost: 192.***.***.**\r\nUpgrade-Insecure-Requests: 1\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\nUser-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 13_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0 EdgiOS/45.6.8 Mobile/15E148 Safari/605.1.15\r\nAccept-Language: en-us\r\nAccept-Encoding: gzip, deflate\r\nConnection: keep-alive\r\n\r\n'
 serverSide: received data from server:
 b'HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\nDate: Wed, 12 Aug 2020 16:56:30 GMT\r\nServer: ECS (ord/4CF4)\r\nContent-Length: 345\r\n\r\n<?xml version="1.0" encoding="iso-8859-1"?>\n<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"\n         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">\n<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">\n\t<head>\n\t\t<title>404 - Not Found</title>\n\t</head>\n\t<body>\n\t\t<h1>404 - Not Found</h1>\n\t</body>\n</html>\n'
 proxy: Forwarding data to client.
