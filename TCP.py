@@ -1,30 +1,35 @@
 from threading import Thread
 import socket as sock
 from termcolor import colored
-import os
+import os, traceback
 os.system('color')
 
-def pPrint(strIn):
-    print(colored('proxy: {}'.format(strIn), 'yellow'))
+def pPrint(strIn, end = '\n'):
+    print(colored('proxy: {}'.format(strIn), 'yellow'), end = end)
     with open('eventLog.txt', 'a') as logFile:
-        logFile.write('proxy: {}\n'.format(strIn))
+        logFile.write('proxy: {}{}'.format(strIn, end))
         
-def cPrint(strIn):
-    print(colored('clientSide: {}'.format(strIn), 'green'))
+def cPrint(strIn, end = '\n'):
+    print(colored('clientSide: {}'.format(strIn), 'green'), end = end)
     with open('eventLog.txt', 'a') as logFile:
-        logFile.write('clientSide: {}\n'.format(strIn))
+        logFile.write('clientSide: {}{}'.format(strIn, end))
 
-def sPrint(strIn):
-    print(colored('serverSide: {}'.format(strIn), 'cyan'))
+def sPrint(strIn, end = '\n'):
+    print(colored('serverSide: {}'.format(strIn), 'cyan'), end = end)
     with open('eventLog.txt', 'a') as logFile:
-        logFile.write('serverSide: {}\n'.format(strIn))
+        logFile.write('serverSide: {}{}'.format(strIn, end))
 
-def ePrint(strIn):
-    print(colored('cleanup: {}'.format(strIn), 'red'))
+def ePrint(strIn, end = '\n'):
+    print(colored('cleanup: {}'.format(strIn), 'red'), end = end)
     with open('eventLog.txt', 'a') as logFile:
-        logFile.write('cleanup: {}\n'.format(strIn))
+        logFile.write('cleanup: {}{}'.format(strIn, end))
+
+def clearLog():
+    with open('eventLog.txt', 'w') as logFile:
+        logFile.write('')
 
 class cleanup():
+    stopped = False
     def __init__(self, holder, action):
         self.holder = holder
         self.action = action
@@ -32,8 +37,17 @@ class cleanup():
     def __enter__(self):
         return
     def __exit__(self, *args):
-        ePrint("Cleaning up. Exception in {} with arguments:\n{}".format(self.holder, args))
-        self.action()
+        excStrs = traceback.format_exception(*args)
+        excPrintStr = '\n'
+        for excStr in excStrs:
+            excPrintStr += excStr
+        ePrint("Exception in {}. Printing traceback:{}".format(self.holder, excPrintStr))
+        if not self.stopped:
+            ePrint("Cleaning up after exception in {}.".format(self.holder))
+            self.action()
+            self.stopped = True
+        else:
+            ePrint("Cleanup has already occured.")
         return
 
 class proxy():         #80             8550            example.com    80
@@ -70,12 +84,13 @@ class proxy():         #80             8550            example.com    80
             pPrint("cSide thread joined.")
         except:
             pPrint("Could not join cSide thread.")
+
         try:
-            self.sSide.join()
-        except:
             pPrint("Joining sSide thread...")
             self.sSide.join()
             pPint("sSide thread joined.")
+        except:
+            pPrint("Could not join sSide thread.")
         
         pPrint("Stopped.")
 
@@ -108,18 +123,14 @@ class clientSide(Thread):       #print in green
     def run(self):
         cPrint('run called')
         
-        #Get a connection from the client
-        cPrint('waiting for client connection...')
-        self.client, self.clientAddr = self.socket.accept()
-        cPrint('connection from {}'.format(self.clientAddr))
-        self.hasConnection = True
-
-        #Wait for the server to connect         #Wait why am I doing this?
-        #while(not self.parentProxy.sSide.connected):
-        #    pass
-
-        #Main loop
         with cleanup(self, self.parentProxy.stop):
+            #Get a connection from the client
+            cPrint('waiting for client connection...')
+            self.client, self.clientAddr = self.socket.accept()
+            cPrint('connection from {}'.format(self.clientAddr))
+            self.hasConnection = True
+
+            #Main loop
             while(not self.stopFlag):
                 try:
                     data = self.client.recv(self.parentProxy.packetSize)    #Get the data and process it
@@ -174,13 +185,14 @@ class serverSide(Thread):       #print in blue or cyan
 
     def run(self):
         sPrint('run called')
-        sPrint('waiting for client to get connection...  ')
-        while(not self.parentProxy.cSide.hasConnection):
-            pass
-
-        self.connect()
         
         with cleanup(self, self.parentProxy.stop):
+            sPrint('waiting for client to get connection...  ')
+            while(not self.parentProxy.cSide.hasConnection):
+                pass
+
+            self.connect()
+        
             while(not self.stopFlag):
                 try:
                     data = self.socket.recv(4096)
@@ -200,6 +212,8 @@ class serverSide(Thread):       #print in blue or cyan
         self.stopFlag = True
 
     def sendall(self, data):
+        while(not self.connected):
+            pass
         sPrint('sendall called')
         sPrint('sending data to server:\n{}'.format(data))
         self.socket.sendall(data)
