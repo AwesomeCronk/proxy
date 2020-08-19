@@ -4,35 +4,56 @@ from termcolor import colored
 import os, traceback
 os.system('color')
 
-from dbgTools.cleanup import cleaner
-
 def pPrint(strIn, end = '\n'):
-    strOut = colored('proxy: {}'.format(strIn), 'yellow') + end
-    print(strOut)
-    writeLog(strOut)
+    print(colored('proxy: {}'.format(strIn), 'yellow'), end = end)
+    with open('eventLog.txt', 'a') as logFile:
+        logFile.write('proxy: {}{}'.format(strIn, end))
         
 def cPrint(strIn, end = '\n'):
-    strOut = colored('clientSide: {}'.format(strIn), 'green') + end
-    print(strOut)
-    writeLog(strOut)
+    print(colored('clientSide: {}'.format(strIn), 'green'), end = end)
+    with open('eventLog.txt', 'a') as logFile:
+        logFile.write('clientSide: {}{}'.format(strIn, end))
 
 def sPrint(strIn, end = '\n'):
-    strOut = colored('serverSide: {}'.format(strIn), 'cyan') + end
-    print(strOut)
-    writeLog(strOut)
+    print(colored('serverSide: {}'.format(strIn), 'cyan'), end = end)
+    with open('eventLog.txt', 'a') as logFile:
+        logFile.write('serverSide: {}{}'.format(strIn, end))
 
 def ePrint(strIn, end = '\n'):
-    strOut = colored('cleanup: {}'.format(strIn), 'red') + end
-    print(strOut)
-    writeLog(strOut)
-
-def writeLog(strIn):
+    print(colored('cleanup: {}'.format(strIn), 'red'), end = end)
     with open('eventLog.txt', 'a') as logFile:
-        logFile.write(strIn)
+        logFile.write('cleanup: {}{}'.format(strIn, end))
 
 def clearLog():
     with open('eventLog.txt', 'w') as logFile:
         logFile.write('')
+
+class cleanup():
+    stopped = False
+    def __init__(self, holder, action, args = ()):
+        self.holder = holder
+        self.action = action
+        self.actionArgs = args
+        return
+    def __enter__(self):
+        return
+    def __exit__(self, *args):
+        excStrs = traceback.format_exception(*args)
+        excPrintStr = '\n'
+        for excStr in excStrs:
+            excPrintStr += excStr
+        ePrint("Exception in {}. Printing traceback:{}".format(self.holder, excPrintStr))
+        if not self.stopped:
+            
+            if self.action != None:
+                ePrint("Cleaning up after exception in {}.".format(self.holder))
+                self.action(*self.actionArgs)
+            else:
+                ePrint("No cleanup action specified for {}.".format(self.holder))
+            self.stopped = True
+        else:
+            ePrint("Cleanup has already occured.")
+        return
 
 class proxy():        #80              8550            example.com    80
     def __init__(self, cSideProxyPort, sSideProxyPort, sSideServerIP, sSideServerPort, connections = 1, packetSize = 4096, maxIterations = -1):
@@ -64,7 +85,7 @@ class proxy():        #80              8550            example.com    80
         self.cSide.stop()
         self.sSide.stop()
         #join cSide and sSide threads
-        with cleaner(self, action = pPrint, args = ("Could not join cSide thread.",), printer = ePrint):
+        with cleanup(self, pPrint, args = ("Could not join cSide thread.",)):
             pPrint("Joining cSide thread...")
             self.cSide.join()
             pPrint("cSide thread joined.")
@@ -107,7 +128,7 @@ class clientSide(Thread):       #print in green
     def run(self):
         cPrint('run called')
         
-        with cleaner(self, action = self.parentProxy.stop, printer = ePrint):
+        with cleanup(self, self.parentProxy.stop):
             #Get a connection from the client
             cPrint('Waiting for client connection...')
             self.socket.settimeout(3)
@@ -176,7 +197,7 @@ class serverSide(Thread):       #print in blue or cyan
     def run(self):
         sPrint('run called')
         
-        with cleaner(self, action = self.parentProxy.stop, printer = ePrint):
+        with cleanup(self, self.parentProxy.stop):
             sPrint('waiting for client to get connection...  ')
             while(not self.parentProxy.cSide.hasConnection):
                 pass

@@ -11,4 +11,7 @@ tcpProxy = TCP.proxy(80, 8550, sock.gethostbyname('example.com'), 80)
 tcpProxy.start()
 while(True):
     if input('') == 'stop':
+        print('command invoked: stop')
+        with open('eventLog.txt', 'a') as logFile:
+            logFile.write('command invoked: stop\n')
         tcpProxy.stop()
