@@ -1,0 +1,26 @@
+Buffers:
+proxy
+|-cBuffer
+`-sBuffer
+
+clientSide
+|-sendBuffer
+`-recvBuffer
+
+serverSide
+|-sendBuffer
+`-recvBuffer
+
+Data transfer plot:
+Format:
+<step number>. <target buffer> via <function>  called in <thread>
+
+Client->Server:
+1. cSide.recvBuffer via cSide.client.recv   called in cSide
+2. proxy.sBuffer    via proxy.sendToServer  called in cSide
+3. sSide.sendBuffer via proxy.manageData    called in proxy
+
+Server->Client:
+1. sSide.recvBuffer via sSide.socket.recv   called in sSide
+2. proxy.cBuffer    via proxy.sendToClient  called in sSide
+3. cSide.sendBuffer via proxy.manageData    called in proxy

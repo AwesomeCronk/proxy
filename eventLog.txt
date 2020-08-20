@@ -1,55 +1,59 @@
-proxy: initializing cSide...
-clientSide: __init__ called
-clientSide: socket created
-clientSide: socket bound
-clientSide: socket listening
-proxy: cSide initialized
-proxy: initializing sSide...
-serverSide: __init__ called
-serverSide: socket created
-serverSide: socket bound
-proxy: sSide initiaized
-proxy: Ip address of the proxy is: ***.***.***.**
-proxy: started cSide
-clientSide: run called
-clientSide: Waiting for client connection...
-serverSide: run called
-serverSide: waiting for client to get connection...  
+[33mproxy: initializing cSide...[0m
+[32mclientSide: __init__ called[0m
+[32mclientSide: socket created[0m
+[32mclientSide: socket bound[0m
+[32mclientSide: socket listening[0m
+[33mproxy: cSide initialized[0m
+[33mproxy: initializing sSide...[0m
+[36mserverSide: __init__ called[0m
+[36mserverSide: socket created[0m
+[36mserverSide: socket bound[0m
+[33mproxy: sSide initiaized[0m
+[33mproxy: Ip address of the proxy is: 192.168.254.74[0m
+[33mproxy: started cSide[0m
+[32mclientSide: run called[0m
+[36mserverSide: run called[0m
+[33mproxy: started sSide[0m
+[32mclientSide: Waiting for client connection...[0m
+[36mserverSide: waiting for client to get connection...  [0m
+[32mclientSide: Waiting for client connection...[0m
+[32mclientSide: Waiting for client connection...[0m
+[32mclientSide: Waiting for client connection...[0m
 command invoked: stop
-proxy: Stopping...
-clientSide: Stopping...
-clientSide: Cannot close socket.
-clientSide: Closed client connection.
-serverSide: Stopping...
-serverSide: Disconnected from server.
-proxy: Joining cSide thread...
-clientSide: Waiting for client connection...
-clientSide: loop broken
-cleanup: Exception in <clientSide(Thread-1, started 2684)>. Printing traceback:
+[33mproxy: Stopping...[0m
+[32mclientSide: Stopping...[0m
+[32mclientSide: Cannot close socket.[0m
+[32mclientSide: Closed client connection.[0m
+[36mserverSide: Stopping...[0m
+[36mserverSide: Disconnected from server.[0m
+[33mproxy: Joining cSide thread...[0m
+[32mclientSide: Waiting for client connection...[0m
+[32mclientSide: loop broken[0m
+[31mcleanup: Exception in <clientSide(Thread-1, started 2496)>. Printing traceback:
 NoneType: None
-
-cleanup: Cleaning up after exception in <clientSide(Thread-1, started 2684)>.
-proxy: Stopping...
-clientSide: Stopping...
-clientSide: Cannot close socket.
-clientSide: Closed client connection.
-serverSide: Stopping...
-serverSide: Disconnected from server.
-proxy: Joining cSide thread...
-cleanup: Exception in <TCP.proxy object at 0x000002353C479348>. Printing traceback:
+[0m
+[31mcleanup: Cleaning up after exception in <clientSide(Thread-1, started 2496)>.[0m
+[33mproxy: Stopping...[0m
+[32mclientSide: Stopping...[0m
+[32mclientSide: Cannot close socket.[0m
+[32mclientSide: Closed client connection.[0m
+[36mserverSide: Stopping...[0m
+[36mserverSide: Disconnected from server.[0m
+[33mproxy: Joining cSide thread...[0m
+[31mcleanup: Exception in <TCP.proxy object at 0x0000014A5DFFD788>. Printing traceback:
 Traceback (most recent call last):
-  File "C:\Users\aweso\Documents\Source\Python\proxy\TCP.py", line 90, in stop
+  File "C:\Users\aweso\Documents\Source\Python\proxy\TCP.py", line 69, in stop
     self.cSide.join()
   File "C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\lib\threading.py", line 1041, in join
     raise RuntimeError("cannot join current thread")
 RuntimeError: cannot join current thread
-
-cleanup: Cleaning up after exception in <TCP.proxy object at 0x000002353C479348>.
-proxy: Could not join cSide thread.
-proxy: cSide thread joined.
-cleanup: Exception in <TCP.proxy object at 0x000002353C479348>. Printing traceback:
+[0m
+[31mcleanup: Cleaning up after exception in <TCP.proxy object at 0x0000014A5DFFD788>.[0m
+[33mproxy: Could not join cSide thread.[0m
+[33mproxy: cSide thread joined.[0m
+[31mcleanup: Exception in <TCP.proxy object at 0x0000014A5DFFD788>. Printing traceback:
 NoneType: None
-
-cleanup: Cleaning up after exception in <TCP.proxy object at 0x000002353C479348>.
-proxy: Could not join cSide thread.
-proxy: Joining sSide thread...
+[0m
+[31mcleanup: Cleaning up after exception in <TCP.proxy object at 0x0000014A5DFFD788>.[0m
+[33mproxy: Could not join cSide thread.[0m
+[33mproxy: Joining sSide thread...[0m
