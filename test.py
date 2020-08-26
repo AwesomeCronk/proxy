@@ -6,9 +6,17 @@ import socket as sock
 #sSideServerIP - IP address of the server.
 #sSideServerPort - port that the server is listening on.
 
-TCP.clearLog()
 tcpProxy = TCP.proxy(80, 8550, sock.gethostbyname('example.com'), 80)
 tcpProxy.start()
+
+class tcpProxy(TCP.proxy):
+    def run(self):
+        while(not self.stopFlag):
+            with cleaner(self, action = pPrint, args = ('Exception in self.manageData.',), printer = ePrint):
+                self.manageData()
+
+        self._stop()
+
 while(True):
     if input('') == 'stop':
         print('command invoked: stop')

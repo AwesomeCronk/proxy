@@ -1,4 +1,5 @@
 from dbgTools.logging import basicLogFile
+from termcolor import colored
 
 logFile = None
 def initLogFile(logFilePath):
@@ -9,7 +10,7 @@ def clearLogFile():
     logFile.reset()
 
 def pPrint(strIn, end = '\n'):
-    strOut = colored('proxy: {}'.format(strIn), 'cyan')
+    strOut = colored('proxy: {}'.format(strIn), 'yellow')
     print(strOut, end = end)
     logFile.addEntry(strOut + end)
         
@@ -19,7 +20,7 @@ def cPrint(strIn, end = '\n'):
     logFile.addEntry(strOut + end)
 
 def sPrint(strIn, end = '\n'):
-    strOut = colored('serverSide: {}'.format(strIn), 'blue')
+    strOut = colored('serverSide: {}'.format(strIn), 'cyan')
     print(strOut, end = end)
     logFile.addEntry(strOut + end)
 

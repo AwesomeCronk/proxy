@@ -2,7 +2,6 @@ from threading import Thread
 import socket as sock
 import os
 os.system('color')
-from termcolor import colored
 from dbgTools.cleanup import cleaner
 from printing import initLogFile, clearLogFile, pPrint, cPrint, sPrint, ePrint
 
@@ -22,6 +21,14 @@ class proxy():        #80              8550            example.com    80
         self.stopped = False
         self.cBuffer = []
         self.sBuffer = []
+
+        #Commands. These can be modified by whatever user-defined class inherits from TCP.proxy.
+        #There must be a function to call for each command which takes no arguments except for self.
+        #Recommended method for adding commands is self.commands.update(dictOfNewCommands)
+        self.commands = {'dumpBuffers': self.dumpBuffers,
+                         'stop': self.stop,
+                         'null': self.nullCommand
+                         }
         
         #Initialize the log file
         initLogFile('eventlog.txt')
@@ -45,12 +52,32 @@ class proxy():        #80              8550            example.com    80
         
     def run(self):
         while(not self.stopFlag):
-            with cleaner(self, action = pPrint, args = ('Exception in self.manageData.',), printer = ePrint):
-                self.manageData()
+            try:
+                userInput = input().split()
+                command = userInput[0]
+                paramsIn = userInput[1:]
+            except KeyboardInterrupt:
+                command = 'null'
+            try:
+                self.commands[command](*paramsIn)
+            except KeyError:
+                pPrint("Invalid command - '{}'".format(commandIn))
 
         self._stop()
 
-    def stop(self, sender):
+    #Base commands are defined here:
+    def dumpBuffers(self):
+        pPrint('Dumping contents of proxy.cBuffer:')
+        for i in range(len(self.cBuffer)):
+            pPrint('Item at address {}:\n'.format(i, self.cBuffer[i]))
+        pPrint('Dumping contents of proxy.sBuffer:')
+        for i in range(len(self.sBuffer)):
+            pPrint('Item at address {}:\n'.format(i, self.sBuffer[i]))
+
+    def nullCommand(self):
+        pass
+
+    def stop(self, sender = 'user'):
         pPrint('Stop requested by {}'.format(sender))
         self.stopFlag = True
 
@@ -75,19 +102,22 @@ class proxy():        #80              8550            example.com    80
             self.stopped = True
         pPrint("Stopped.")
 
-    def manageData(self):       #Move data to the cSide and sSide if the buffer has data and they are not busy
-        if len(self.cBuffer) > 0 and not cSide.busy:
-            pPrint("Moving data from cBuffer to cSide.sendBuffer.")
-            cSide.send(self.cBuffer[0])
-        if len(self.sBuffer) > 0 and not sSide.busy:
-            pPrint("Moving data from cBuffer to sSide.sendBuffer.")
-            sSide.send(self.sBuffer[0])
 
-    def sendToClient(self, data):       #Forward data to the client
+#    def manageData(self):       #Move data to the cSide and sSide if the buffer has data and they are not busy
+#        if len(self.cBuffer) > 0 and not cSide.busy:
+#            pPrint("Moving data from cBuffer to cSide.sendBuffer.")
+#            cSide.send(self.cBuffer[0])
+#            del(self.cBuffer[0])        #Make sure to remove the item from the buffer after sending it.
+#        if len(self.sBuffer) > 0 and not sSide.busy:
+#            pPrint("Moving data from sBuffer to sSide.sendBuffer.")
+#            sSide.send(self.sBuffer[0])
+#            del(self.sBuffer[0])        #Make sure to remove the item from the buffer after sending it.
+
+    def cBufferAppend(self, data):       #Forward data to the client
         pPrint("Appending data to cBuffer.")
         self.cBuffer.append(data)
 
-    def sendToServer(self, data):       #Forward data to the server
+    def sBufferAppend(self, data):       #Forward data to the server
         pPrint("Appending data to sBuffer.")
         self.sBuffer.append(data)
 
@@ -96,17 +126,15 @@ class clientSide(Thread):       #print in green
         Thread.__init__(self)
         cPrint('__init__ called')
 
-        #Recording arguments
+        #Record arguments
         self.parentProxy = parentProxy
         self.port = port
 
-        #Declaring variables
+        #Declare variables
         self.stopFlag = False
         self.stopped = False
         self.busy = False
         self.hasConnection = False
-        self.sendBuffer = []    #Buffers for sending and receiving data
-        self.recvBuffer = []
 
         #Initialize and bind the socket
         self.socket = sock.socket(sock.AF_INET, sock.SOCK_STREAM)
@@ -116,21 +144,24 @@ class clientSide(Thread):       #print in green
         self.socket.listen(self.parentProxy.connections)
         cPrint('socket listening')
 
-    def run(self):          #Main loop
+    def getConnection(self):
+        cPrint('Waiting for client connection...')
+        self.socket.settimeout(3)
+        while(not self.stopFlag):
+            try:
+                self.client, self.clientAddr = self.socket.accept()
+                cPrint('Connection from {}'.format(self.clientAddr))
+                self.hasConnection = True
+                break
+            except sock.timeout:
+                cPrint('Waiting for client connection...')
+
+    def run(self):
         cPrint('run called')
         
-        with cleaner(self, action = self.parentProxy.requestStop, args = (self,), printer = ePrint):
+        with cleaner(self, action = self.parentProxy.stop, args = (self,), printer = ePrint):
             #Get a connection from the client
-            cPrint('Waiting for client connection...')
-            self.socket.settimeout(3)
-            while(not self.stopFlag):
-                try:
-                    self.client, self.clientAddr = self.socket.accept()
-                    cPrint('Connection from {}'.format(self.clientAddr))
-                    self.hasConnection = True
-                    break
-                except sock.timeout:
-                    cPrint('Waiting for client connection...')
+            self.getConnection()
 
             #Main loop
             cPrint("Entering main loop.")
@@ -141,24 +172,31 @@ class clientSide(Thread):       #print in green
                     data = self.client.recv(self.parentProxy.packetSize)
                     if data:
                         cPrint('received data from client:\n{}'.format(data))
-                        self.parentProxy.sendToServer(data)
+                        self.parentProxy.sBufferAppend(data)
                 except sock.timeout:
                     pass
                 except ConnectionAbortedError:
                     cPrint('client disconnected. Calling parentProxy.stop().')
-                    self.parentProxy.stop()
+                    self.parentProxy.stop(self)
 
                 #Check if there is data in the send buffer and send it to the client
                 try:
-                    if len(self.sendBuffer) > 0:
-                        cPrint('Sending data to client:\n{}'.format(self.sendBuffer[0]))
-                        self.client.sendall(data)
+                    if len(self.parentProxy.cBuffer) > 0:
+                        self._send()
                 except ConnectionAbortedError:
                     cPrint('client disconnected. Calling parentProxy.stop().')
-                    self.parentProxy.stop()
+                    self.parentProxy.stop(self)
 
             cPrint('loop broken')
             self._stop()
+
+    def _send(self):
+        self.busy = True
+        cPrint('Sending data to client:\n{}'.format(self.parentProxy.cBuffer[0]))
+        self.client.sendall(self.parentProxy.cBuffer[0])
+        del(self.parentProxy.cBuffer[0])     #Make sure to remove the item from the buffer after sending it.
+        self.busy = False
+        cPrint('Data sent')
 
     def stop(self):
         self.stopFlag = True
@@ -172,17 +210,6 @@ class clientSide(Thread):       #print in green
         self.hasConnection = False
         cPrint("Closed client connection.")
 
-    def send(self, data):
-        self.sendBuffer.append(data)
-
-    def _send(self, data):
-        self.busy = True
-        cPrint('sendall called')
-        cPrint('sending data to client:\n{}'.format(data))
-        self.client.sendall(data)
-        self.busy = False
-        cPrint('data sent')
-
 class serverSide(Thread):       #print in blue or cyan
     def __init__(self, parentProxy, port, serverIP, serverPort):
         Thread.__init__(self)
@@ -195,46 +222,61 @@ class serverSide(Thread):       #print in blue or cyan
 
         #Declare variables
         self.stopFlag = False
+        self.stopped = False
+        self.busy = False
         self.connected = False
-        self.sendBuffer = []
 
-        #Initiate and bind the socket
+        #Initialize and bind the socket
         self.socket = sock.socket(sock.AF_INET, sock.SOCK_STREAM)
         sPrint('socket created')
         self.socket.bind(('', self.port))
         sPrint('socket bound')
 
     def connect(self):
-        sPrint('connecting socket...')
-        self.socket.connect((self.serverIP, self.serverPort))
-        sPrint('socket connected')
-        self.connected = True
+        sPrint('Connecting socket...')
+        self.socket.settimeout(3)
+        while(not self.stopFlag):
+            try:
+                self.socket.connect((self.serverIP, self.serverPort))
+                sPrint('Socket connected.')
+                self.connected = True
+                break
+            except sock.timeout:
+                sPrint('Connecting Socket...')
 
     def run(self):
         sPrint('run called')
         
-        with cleaner(self, action = self.parentProxy.stop, printer = ePrint):
+        with cleaner(self, action = self.parentProxy.stop, args = (self,), printer = ePrint):
             sPrint('waiting for client to get connection...  ')
-            while(not self.parentProxy.cSide.hasConnection):
+            while(not self.parentProxy.cSide.hasConnection and not self.stopFlag):
                 pass
 
             self.connect()
         
             #Main loop
+            sPrint('Entering main loop...')
+            self.socket.settimeout(2)
             while(not self.stopFlag):
                 #Receive data and forward it to proxy.cBuffer
                 try:
                     data = self.socket.recv(4096)
                     if data:
                         sPrint('received data from server:\n{}'.format(data))
-                        self.parentProxy.sendToClient(data)
+                        self.parentProxy.cBufferAppend(data)
+                except sock.timeout:
+                    pass
                 except ConnectionAbortedError:
                     sPrint('Server disconnected. Calling parentProxy.stop().')
-                    self.parentProxy.stop()
+                    self.parentProxy.stop(self)
                 
-                #Check if there is data in self.sendBuffer and send it to the server
+                #Check if there is data in the send buffer and send it to the server
                 try:
-
+                    if len(self.parentProxy.sBuffer) > 0:
+                        self._send()
+                except ConnectionAbortedError:
+                    sPrint('Server disconnected. Calling parentProxy.stop().')
+                    self.parentProxy.stop(self)
 
             sPrint('loop broken')
             self._stop()
@@ -249,9 +291,10 @@ class serverSide(Thread):       #print in blue or cyan
         self.connected = False
         sPrint("Disconnected from server.")
 
-    def send(self, data):
-        self.sendBuffer.append(data)
-
     def _send(self):
-        sPrint('Sending data to server:\n{}'.format(self.sendBuffer[0]))
-        self.socket.sendall(self.sendBuffer[0])
+        sPrint('Sending data to server:\n{}'.format(self.parentProxy.sBuffer[0]))
+        self.busy = True
+        self.socket.sendall(self.parentProxy.sBuffer[0])
+        del(self.parentProxy.sBuffer[0])
+        self.busy = False
+        sPrint('Data sent.')
