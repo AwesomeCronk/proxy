@@ -11,76 +11,124 @@
 [33mproxy: sSide initiaized[0m
 [33mproxy: Ip address of the proxy is: 192.***.***.**[0m
 [32mclientSide: run called[0m
-[33mproxy: started cSide[0m
 [32mclientSide: Waiting for client connection...[0m
 [33mproxy: started sSide[0m
 [36mserverSide: run called[0m
 [36mserverSide: waiting for client to get connection...  [0m
 [32mclientSide: Waiting for client connection...[0m
-[32mclientSide: Waiting for client connection...[0m
-[32mclientSide: Waiting for client connection...[0m
-[32mclientSide: Waiting for client connection...[0m
-[32mclientSide: Waiting for client connection...[0m
-[32mclientSide: Waiting for client connection...[0m
-[32mclientSide: Waiting for client connection...[0m
-[32mclientSide: Waiting for client connection...[0m
-[32mclientSide: Waiting for client connection...[0m
-[32mclientSide: Waiting for client connection...[0m
-[32mclientSide: Waiting for client connection...[0m
-[32mclientSide: Waiting for client connection...[0m
-[32mclientSide: Waiting for client connection...[0m
-[32mclientSide: Waiting for client connection...[0m
-[32mclientSide: Waiting for client connection...[0m
-[32mclientSide: Waiting for client connection...[0m
-[32mclientSide: Waiting for client connection...[0m
-[32mclientSide: Waiting for client connection...[0m
-[32mclientSide: Waiting for client connection...[0m
-[32mclientSide: Waiting for client connection...[0m
-[32mclientSide: Waiting for client connection...[0m
-[32mclientSide: Waiting for client connection...[0m
-[32mclientSide: Waiting for client connection...[0m
-[32mclientSide: Waiting for client connection...[0m
-[32mclientSide: Waiting for client connection...[0m
-[32mclientSide: Connection from ('192.***.***.**', 63084)[0m
-[32mclientSide: Entering main loop.[0m
+[32mclientSide: Connection from ('192.***.***.**', 64385)[0m
 [36mserverSide: Connecting socket...[0m
+[32mclientSide: Entering main loop.[0m
+[32mclientSide: Waiting for data from client...[0m
+[32mclientSide: received data from client:
+GET / HTTP/1.1
+Host: 192.***.***.**
+Upgrade-Insecure-Requests: 1
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 13_6_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0 EdgiOS/45.7.3 Mobile/15E148 Safari/605.1.15
+Accept-Language: en-us
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+
+[0m
+[33mproxy: Appending data to sBuffer.[0m
+[32mclientSide: Waiting for data from client...[0m
 [36mserverSide: Socket connected.[0m
 [36mserverSide: Entering main loop...[0m
+[36mserverSide: Waiting for data from server...[0m
+[32mclientSide: Waiting for data from client...[0m
+[36mserverSide: Sending data to server:
+GET / HTTP/1.1
+Host: 192.***.***.**
+Upgrade-Insecure-Requests: 1
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 13_6_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0 EdgiOS/45.7.3 Mobile/15E148 Safari/605.1.15
+Accept-Language: en-us
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+
+[0m
+[36mserverSide: Data sent.[0m
+[36mserverSide: Waiting for data from server...[0m
+[36mserverSide: received data from server:
+HTTP/1.1 404 Not Found
+Content-Type: text/html
+Date: Thu, 27 Aug 2020 00:22:05 GMT
+Server: ECS (ord/4CB5)
+Content-Length: 345
+
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<title>404 - Not Found</title>
+	</head>
+	<body>
+		<h1>404 - Not Found</h1>
+	</body>
+</html>
+[0m
+[33mproxy: Appending data to cBuffer.[0m
+[36mserverSide: Waiting for data from server...[0m
+[32mclientSide: Sending data to client:
+HTTP/1.1 404 Not Found
+Content-Type: text/html
+Date: Thu, 27 Aug 2020 00:22:05 GMT
+Server: ECS (ord/4CB5)
+Content-Length: 345
+
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<title>404 - Not Found</title>
+	</head>
+	<body>
+		<h1>404 - Not Found</h1>
+	</body>
+</html>
+[0m
+[32mclientSide: Data sent[0m
+[32mclientSide: Waiting for data from client...[0m
+[36mserverSide: Waiting for data from server...[0m
+[32mclientSide: Waiting for data from client...[0m
+[36mserverSide: Waiting for data from server...[0m
 [33mproxy: Stop requested by user[0m
 [33mproxy: Stopping...[0m
+[32mclientSide: Stop flag set.[0m
 [36mserverSide: Stop flag set.[0m
 [33mproxy: Joining cSide thread...[0m
 [32mclientSide: loop broken[0m
 [32mclientSide: Stopping...[0m
 [32mclientSide: Closed client connection.[0m
-[31mcleanup: Exception in <clientSide(Thread-1, started 9688)>. Printing traceback:
+[31mcleanup: Exception in <clientSide(Thread-1, started 1184)>. Printing traceback:
 NoneType: None
 [0m
-[31mcleanup: Cleaning up after exception in <clientSide(Thread-1, started 9688)>.[0m
-[33mproxy: Stop requested by <clientSide(Thread-1, started 9688)>[0m
-[32mclientSide: Stopping...[0m
-[32mclientSide: Closed client connection.[0m
+[31mcleanup: Cleaning up after exception in <clientSide(Thread-1, started 1184)>.[0m
+[33mproxy: Stop requested by <clientSide(Thread-1, started 1184)>[0m
+[32mclientSide: Already stopped.[0m
 [33mproxy: cSide thread joined.[0m
-[31mcleanup: Exception in <TCP.proxy object at 0x0000029EEA122948>. Printing traceback:
+[31mcleanup: Exception in <TCP.proxy object at 0x000001F743BC1F48>. Printing traceback:
 NoneType: None
 [0m
-[31mcleanup: Cleaning up after exception in <TCP.proxy object at 0x0000029EEA122948>.[0m
+[31mcleanup: Cleaning up after exception in <TCP.proxy object at 0x000001F743BC1F48>.[0m
 [33mproxy: Could not join cSide thread.[0m
 [33mproxy: Joining sSide thread...[0m
 [36mserverSide: loop broken[0m
 [36mserverSide: Stopping...[0m
 [36mserverSide: Disconnected from server.[0m
-[31mcleanup: Exception in <serverSide(Thread-2, started 10496)>. Printing traceback:
+[31mcleanup: Exception in <serverSide(Thread-2, started 4092)>. Printing traceback:
 NoneType: None
 [0m
-[31mcleanup: Cleaning up after exception in <serverSide(Thread-2, started 10496)>.[0m
-[33mproxy: Stop requested by <serverSide(Thread-2, started 10496)>[0m
-[36mserverSide: Stopping...[0m
-[36mserverSide: Disconnected from server.[0m
+[31mcleanup: Cleaning up after exception in <serverSide(Thread-2, started 4092)>.[0m
+[33mproxy: Stop requested by <serverSide(Thread-2, started 4092)>[0m
+[36mserverSide: Already stopped.[0m
 [33mproxy: sSide thread joined.[0m
-[31mcleanup: Exception in <TCP.proxy object at 0x0000029EEA122948>. Printing traceback:
+[31mcleanup: Exception in <TCP.proxy object at 0x000001F743BC1F48>. Printing traceback:
 NoneType: None
 [0m
-[31mcleanup: Cleaning up after exception in <TCP.proxy object at 0x0000029EEA122948>.[0m
+[31mcleanup: Cleaning up after exception in <TCP.proxy object at 0x000001F743BC1F48>.[0m
 [33mproxy: Could not join sSide thread.[0m
 [33mproxy: Stopped.[0m

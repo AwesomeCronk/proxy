@@ -164,14 +164,15 @@ class clientSide(Thread):       #print in green
             self.getConnection()
 
             #Main loop
-            cPrint("Entering main loop.")
             self.client.settimeout(2)
+            cPrint("Entering main loop.")
             while(not self.stopFlag):
                 #Receive data and forward it to proxy.sBuffer
                 try:
+                    cPrint('Waiting for data from client...')
                     data = self.client.recv(self.parentProxy.packetSize)
                     if data:
-                        cPrint('received data from client:\n{}'.format(data))
+                        cPrint('received data from client:\n{}'.format(data.decode('utf-8', errors = 'ignore')))
                         self.parentProxy.sBufferAppend(data)
                 except sock.timeout:
                     pass
@@ -192,7 +193,7 @@ class clientSide(Thread):       #print in green
 
     def _send(self):
         self.busy = True
-        cPrint('Sending data to client:\n{}'.format(self.parentProxy.cBuffer[0]))
+        cPrint('Sending data to client:\n{}'.format(self.parentProxy.cBuffer[0].decode('utf-8', errors = 'ignore')))
         self.client.sendall(self.parentProxy.cBuffer[0])
         del(self.parentProxy.cBuffer[0])     #Make sure to remove the item from the buffer after sending it.
         self.busy = False
@@ -200,8 +201,12 @@ class clientSide(Thread):       #print in green
 
     def stop(self):
         self.stopFlag = True
+        cPrint('Stop flag set.')
 
     def _stop(self):
+        if self.stopped:
+            cPrint('Already stopped.')
+            return
         cPrint("Stopping...")
         try:
             self.client.close()
@@ -209,6 +214,7 @@ class clientSide(Thread):       #print in green
             cPrint("Cannot close socket.")
         self.hasConnection = False
         cPrint("Closed client connection.")
+        self.stopped = True
 
 class serverSide(Thread):       #print in blue or cyan
     def __init__(self, parentProxy, port, serverIP, serverPort):
@@ -255,14 +261,15 @@ class serverSide(Thread):       #print in blue or cyan
             self.connect()
         
             #Main loop
-            sPrint('Entering main loop...')
             self.socket.settimeout(2)
+            sPrint('Entering main loop...')
             while(not self.stopFlag):
                 #Receive data and forward it to proxy.cBuffer
                 try:
+                    sPrint('Waiting for data from server...')
                     data = self.socket.recv(4096)
                     if data:
-                        sPrint('received data from server:\n{}'.format(data))
+                        sPrint('received data from server:\n{}'.format(data.decode('utf-8', errors = 'ignore')))
                         self.parentProxy.cBufferAppend(data)
                 except sock.timeout:
                     pass
@@ -286,13 +293,17 @@ class serverSide(Thread):       #print in blue or cyan
         sPrint('Stop flag set.')
 
     def _stop(self):
+        if self.stopped:
+            sPrint('Already stopped.')
+            return
         sPrint("Stopping...")
         self.socket.close()
         self.connected = False
         sPrint("Disconnected from server.")
+        self.stopped = True
 
     def _send(self):
-        sPrint('Sending data to server:\n{}'.format(self.parentProxy.sBuffer[0]))
+        sPrint('Sending data to server:\n{}'.format(self.parentProxy.sBuffer[0].decode('utf-8', errors = 'ignore')))
         self.busy = True
         self.socket.sendall(self.parentProxy.sBuffer[0])
         del(self.parentProxy.sBuffer[0])
