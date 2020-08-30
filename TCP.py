@@ -89,15 +89,13 @@ class proxy():        #80              8550            example.com    80
         self.sSide.stop()
 
         #Join the cSide and sSide threads.
-        with cleaner(self, action = pPrint, args = ("Could not join cSide thread.",), printer = ePrint):
+        with cleaner(self, badAction = pPrint, badArgs = ("Could not join cSide thread.",), okAction = pPrint, okArgs = ("Successfully joined cSide thread.",), printer = ePrint):
             pPrint("Joining cSide thread...")
             self.cSide.join()
-            pPrint("cSide thread joined.")
 
-        with cleaner(self, action = pPrint, args = ("Could not join sSide thread.",), printer = ePrint):
+        with cleaner(self, badAction = pPrint, badArgs = ("Could not join sSide thread.",), okAction = pPrint, okArgs = ("Successfully joined sSide thread.",), printer = ePrint):
             pPrint("Joining sSide thread...")
             self.sSide.join()
-            pPrint("sSide thread joined.")
         
             self.stopped = True
         pPrint("Stopped.")
@@ -159,12 +157,13 @@ class clientSide(Thread):       #print in green
     def run(self):
         cPrint('run called')
         
-        with cleaner(self, action = self.parentProxy.stop, args = (self,), printer = ePrint):
+        with cleaner(self, badAction = self.parentProxy.stop, badArgs = (self,), okAction = pPrint, okArgs = ("Main loop broke with no exceptions.",), printer = ePrint):
             #Get a connection from the client
             self.getConnection()
 
             #Main loop
-            self.client.settimeout(2)
+            if not self.stopFlag:
+                self.client.settimeout(2)
             cPrint("Entering main loop.")
             while(not self.stopFlag):
                 #Receive data and forward it to proxy.sBuffer
@@ -188,8 +187,7 @@ class clientSide(Thread):       #print in green
                     cPrint('client disconnected. Calling parentProxy.stop().')
                     self.parentProxy.stop(self)
 
-            cPrint('loop broken')
-            self._stop()
+        self._stop()
 
     def _send(self):
         self.busy = True
@@ -253,8 +251,8 @@ class serverSide(Thread):       #print in blue or cyan
     def run(self):
         sPrint('run called')
         
-        with cleaner(self, action = self.parentProxy.stop, args = (self,), printer = ePrint):
-            sPrint('waiting for client to get connection...  ')
+        with cleaner(self, badAction = self.parentProxy.stop, badArgs = (self,), okAction = sPrint, okArgs = ("Main loop broke with no exceptions.",), printer = ePrint):
+            sPrint('Waiting for client to get connection...')
             while(not self.parentProxy.cSide.hasConnection and not self.stopFlag):
                 pass
 
@@ -285,8 +283,8 @@ class serverSide(Thread):       #print in blue or cyan
                     sPrint('Server disconnected. Calling parentProxy.stop().')
                     self.parentProxy.stop(self)
 
-            sPrint('loop broken')
-            self._stop()
+        sPrint('loop broken')
+        self._stop()
         
     def stop(self):
         self.stopFlag = True
